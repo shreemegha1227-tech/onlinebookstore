@@ -1,14 +1,19 @@
-# Stage 1 - Build
+# ---------- Stage 1: Build ----------
 FROM maven:3.9.6-eclipse-temurin-17 AS build
+
 WORKDIR /app
-COPY pom.xml .
-RUN mvn dependency:go-offline
-COPY src ./src
+COPY . .
 RUN mvn clean package -DskipTests
 
-# Stage 2 - Run
-FROM eclipse-temurin:17-jdk-alpine
-WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+# ---------- Stage 2: Run on Tomcat ----------
+FROM tomcat:9.0
+
+# Remove default Tomcat apps
+RUN rm -rf /usr/local/tomcat/webapps/*
+
+# Copy WAR file into Tomcat
+COPY --from=build /app/target/*.war /usr/local/tomcat/webapps/ROOT.war
+
 EXPOSE 8080
-ENTRYPOINT ["java","-jar","app.jar"]
+
+CMD ["catalina.sh", "run"]
