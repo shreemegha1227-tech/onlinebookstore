@@ -8,12 +8,6 @@ pipeline {
 
     stages {
 
-        stage('Clone Code') {
-            steps {
-                git branch: 'main', url: 'https://github.com/shreemegha1227-tech/onlinebookstore.git'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 script {
